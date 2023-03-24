@@ -37,12 +37,49 @@ jobs:
         with:
           name: artifacts_export
           path: ${{ github.workspace }}/pkgs-test/artifacts_export
+          
+  check-errors:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Download artifacts_export
+        uses: actions/download-artifact@v3
+        with:
+          name: artifacts_export
       - name: Packages test error
         shell: bash 
         run: |
-          cd ${{ github.workspace }}/pkgs-test/artifacts_export || true
           if [ -f "index.html" ]; then str1=`cat index.html`; else str1=""; fi
           echo $str1
           str2="#f00"
           if [[ $str1 == *$str2* ]]; then echo "Software package test failed." && exit 1;\
           else echo "Software package test success.";fi
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Download artifacts_export
+        uses: actions/download-artifact@v3
+        with:
+          name: artifacts_export
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
