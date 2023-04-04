@@ -24,8 +24,8 @@ jobs:
           PYTHONCMD="import shutil; import os; config = __import__('pkgs-test').Config(); \
           shutil.move('../packages', os.path.join(config.get_path('env'),'packages'));\
           config.get_resources();"; fi
-          git clone https://github.com/RT-Thread/pkgs-test.git
-          cd pkgs-test && python -c "$PYTHONCMD"
+          git clone https://github.com/zhkag/pkgs-test.git
+          cd pkgs-test && git checkout test && python -c "$PYTHONCMD"
       - name: Carry Out Packages Test
         shell: bash 
         run: |
